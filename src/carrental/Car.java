@@ -1,5 +1,7 @@
 package carrental;
 
+import java.util.Objects;
+
 public class Car {
     private final long id;
     private String make;
@@ -7,8 +9,9 @@ public class Car {
     private int year;
     private long pricePerDayInCents;
     private boolean isAvailable;
+    private final CarType carType;
 
-    Car(long id, String make, String model, int year, long dayRent) {
+    Car(long id, String make, String model, int year, long dayRent, CarType carType) {
         if (year <= 0 || year > 2026) {
             throw new IllegalArgumentException("Invalid year");
         } else if (dayRent <= 0) {
@@ -18,7 +21,9 @@ public class Car {
         } else if (model == null || model.isBlank()) {
             throw new IllegalArgumentException("Model cannot be null");
         } else if (id < 1) {
-            throw new IllegalArgumentException("Id must be greater than 1");
+            throw new IllegalArgumentException("Id must be greater than 0");
+        } else if (carType == null) {
+            throw new IllegalArgumentException("Car type can't be null");
         }
         this.id = id;
         this.make = make;
@@ -26,6 +31,7 @@ public class Car {
         this.year = year;
         this.pricePerDayInCents = dayRent;
         this.isAvailable = true;
+        this.carType = carType;
     }
 
     public long getId() {
@@ -40,6 +46,22 @@ public class Car {
         return isAvailable;
     }
 
+    public CarType getCarType() {
+        return carType;
+    }
+
+    public String getMake() {
+        return make;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
     public void rent() {
         if (!isAvailable) {
             throw new IllegalStateException("The car is unavailable for rent");
@@ -49,5 +71,20 @@ public class Car {
 
     public void returnTheCar() {
         this.isAvailable = true;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) return false;
+        if (object == this) return true;
+
+        if (!(object instanceof Car car)) return false;
+
+        return car.getId() == id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
