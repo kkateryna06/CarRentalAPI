@@ -6,7 +6,7 @@ import carrental.BookingStatus;
 import java.util.*;
 
 
-public class BookingRepository implements Repository<Booking>{
+public class BookingRepository implements Repository<Booking, Long> {
     private final Map<Long, Booking> bookings;
 
     public BookingRepository() {
@@ -15,17 +15,16 @@ public class BookingRepository implements Repository<Booking>{
 
     @Override
     public boolean add(Booking booking) {
-        if (booking == null) {
-            throw new IllegalArgumentException("Booking can't be null");
-        }
+        if (booking == null) throw new IllegalArgumentException("Booking can't be null");
+
         return bookings.putIfAbsent(booking.getId(), booking) == null;
     }
 
     @Override
-    public Booking findById(long id) {
-        if (id < 1) {
-            throw new IllegalArgumentException("Id must be greater than 0");
-        }
+    public Booking findById(Long id) {
+        if (id == null) throw new IllegalArgumentException("Id can't be null");
+        if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
+
         Booking booking = bookings.get(id);
         if (booking == null) {
             throw new NoSuchElementException("No such element");
@@ -39,10 +38,10 @@ public class BookingRepository implements Repository<Booking>{
     }
 
     @Override
-    public boolean removeById(long id) {
-        if (id < 1) {
-            throw new IllegalArgumentException("Id must be greater than 0");
-        }
+    public boolean removeById(Long id) {
+        if (id == null) throw new IllegalArgumentException("Id can't be null");
+        if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
+
         return bookings.remove(id) != null;
     }
 

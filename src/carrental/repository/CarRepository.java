@@ -4,7 +4,7 @@ import carrental.Car;
 
 import java.util.*;
 
-public class CarRepository implements Repository<Car> {
+public class CarRepository implements Repository<Car, Long> {
     private final Map<Long, Car> cars;
 
     public CarRepository() {
@@ -20,14 +20,13 @@ public class CarRepository implements Repository<Car> {
     }
 
     @Override
-    public Car findById(long id) {
-        if (id < 1) {
-            throw new IllegalArgumentException("Id must be greater than 0");
-        }
+    public Car findById(Long id) {
+        if (id == null) throw new IllegalArgumentException("Id can't be null");
+        if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
+
         Car car = cars.get(id);
-        if (car == null) {
-            throw new NoSuchElementException("No such element");
-        }
+        if (car == null) throw new NoSuchElementException("No such element");
+
         return car;
     }
 
@@ -37,10 +36,10 @@ public class CarRepository implements Repository<Car> {
     }
 
     @Override
-    public boolean removeById(long id) {
-        if (id < 1) {
-            throw new IllegalArgumentException("Id must be greater than 0");
-        }
+    public boolean removeById(Long id) {
+        if (id == null) throw new IllegalArgumentException("Id can't be null");
+        if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
+
         return cars.remove(id) != null;
     }
 

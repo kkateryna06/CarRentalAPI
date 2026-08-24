@@ -5,11 +5,9 @@ import carrental.pricing.PriceCalculator;
 import carrental.pricing.StandardPriceCalculator;
 import carrental.repository.BookingRepository;
 import carrental.repository.CarRepository;
+import carrental.repository.RepositoryUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -61,14 +59,14 @@ public class Main {
 
         System.out.println(carRepository.count());
 
-        System.out.println(carRepository.findById(2));
+        System.out.println(carRepository.findById(2L));
         try {
-            System.out.println(carRepository.findById(-1));
+            System.out.println(carRepository.findById(-1L));
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
         try {
-            System.out.println(carRepository.findById(100));
+            System.out.println(carRepository.findById(100L));
         } catch (NoSuchElementException e) {
             System.out.println(e.getMessage());
         }
@@ -166,5 +164,197 @@ public class Main {
 
         car1.rent();
         System.out.println(carSummary1.available());
+
+        // day 5
+        System.out.println();
+        System.out.println("Day 5");
+        System.out.println(carRepository.findAll());
+        System.out.println(bookingRepository.findAll());
+
+        // add
+        carRepository.add(new Car(4L, "Volkswagen", "Tiguan", 2023,
+                70_00L, CarType.SUV));
+        bookingRepository.add(new Booking(4L, carRepository.findById(4L), customer3, 10,
+                new LongTermPriceCalculator()));
+
+        // delete
+        carRepository.removeById(4L);
+        try {
+            System.out.println(carRepository.findById(4L));
+        } catch (NoSuchElementException e) {
+            System.out.println(e.getMessage());
+        }
+        bookingRepository.removeById(4L);
+        try {
+            System.out.println(bookingRepository.findById(4L));
+        } catch (NoSuchElementException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // null id
+        try {
+            carRepository.findById(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            bookingRepository.removeById(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // invalid id
+        try {
+            carRepository.removeById(0L);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            bookingRepository.findById(0L);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            carRepository.removeById(-4L);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            bookingRepository.findById(-4L);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // addAll()
+        System.out.println(
+            RepositoryUtils.addAll(carRepository,
+                List.of(
+                        new Car(5L, "Toyota", "RAV4", 2023, 75_00, CarType.SUV),
+                        new Car(6L, "Tesla", "Model 3", 2022, 110_00, CarType.PREMIUM),
+                        new Car(7L, "Porsche", "911", 2024, 300_00, CarType.PREMIUM)
+                )
+            )
+        );
+
+        System.out.println(
+            RepositoryUtils.addAll(bookingRepository,
+                List.of(
+                        new Booking(5L, carRepository.findById(6L), customer3, 3, new StandardPriceCalculator()),
+                        new Booking(6L, carRepository.findById(5L), customer4, 7, new LongTermPriceCalculator()),
+                        new Booking(7L, carRepository.findById(7L), customer3, 2, new StandardPriceCalculator())
+                )
+            )
+        );
+
+        // existed id
+        System.out.println(
+            RepositoryUtils.addAll(carRepository,
+                List.of(new Car(5L, "Toyota", "RAV4", 2023, 75_00, CarType.SUV))
+            )
+        );
+
+        bookingRepository.findById(5L).complete();
+        System.out.println(
+                RepositoryUtils.addAll(bookingRepository,
+                        List.of(new Booking(5L, carRepository.findById(6L), customer3, 3, new StandardPriceCalculator()))
+                )
+        );
+
+        // empty list
+        System.out.println(
+                RepositoryUtils.addAll(carRepository, new ArrayList<>())
+        );
+
+        System.out.println(
+                RepositoryUtils.addAll(bookingRepository, new ArrayList<>())
+        );
+
+        // empty list with null
+        List<Car> carListWithNull = new ArrayList<>();
+        try {
+            carListWithNull.add(new Car(8L, "Toyota", "RAV4", 2023, 75_00, CarType.SUV));
+            carListWithNull.add(null);
+            RepositoryUtils.addAll(carRepository, carListWithNull);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        List<Booking> bookingListWithNull = new ArrayList<>();
+        try {
+            bookingListWithNull.add(new Booking(5L, carRepository.findById(2L), customer3, 3, new StandardPriceCalculator()));
+            bookingListWithNull.add(null);
+            RepositoryUtils.addAll(bookingRepository, bookingListWithNull);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // findAllByIds
+        System.out.println(
+            RepositoryUtils.findAllByIds(carRepository, List.of(1L, 5L, 6L))
+        );
+
+        System.out.println(
+            RepositoryUtils.findAllByIds(bookingRepository, List.of(1L, 5L, 6L))
+        );
+
+        // repeated id
+        System.out.println(
+                RepositoryUtils.findAllByIds(carRepository, List.of(5L, 5L, 5L))
+        );
+
+        System.out.println(
+                RepositoryUtils.findAllByIds(bookingRepository, List.of(5L, 5L, 5L))
+        );
+
+        // empty list
+        System.out.println(
+                RepositoryUtils.findAllByIds(carRepository, List.of())
+        );
+
+        System.out.println(
+                RepositoryUtils.findAllByIds(bookingRepository, List.of())
+        );
+
+        // list with null
+        List<Long> ids = new ArrayList<>();
+        ids.add(5L);
+        ids.add(null);
+
+        try {
+            System.out.println(
+                    RepositoryUtils.findAllByIds(carRepository, ids)
+            );
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            System.out.println(
+                    RepositoryUtils.findAllByIds(bookingRepository, ids)
+            );
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // not existed id
+        try {
+            System.out.println(
+                    RepositoryUtils.findAllByIds(carRepository, List.of(20L))
+            );
+        } catch (NoSuchElementException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            System.out.println(
+                    RepositoryUtils.findAllByIds(bookingRepository, List.of(20L))
+            );
+        } catch (NoSuchElementException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
