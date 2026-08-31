@@ -73,6 +73,10 @@ public class Car {
         this.isAvailable = true;
     }
 
+    public void printInfo() {
+        System.out.println(id + " " + make + " " + model + " " + year + " " + pricePerDayInCents);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null) return false;

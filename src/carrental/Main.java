@@ -1,5 +1,8 @@
 package carrental;
 
+import carrental.comparators.CarByMakeComparator;
+import carrental.comparators.CarByPriceComparator;
+import carrental.comparators.CarByYearComparator;
 import carrental.pricing.LongTermPriceCalculator;
 import carrental.pricing.PriceCalculator;
 import carrental.pricing.StandardPriceCalculator;
@@ -356,5 +359,93 @@ public class Main {
         } catch (NoSuchElementException e) {
             System.out.println(e.getMessage());
         }
+
+        // day 6
+
+        // Compare cars
+        System.out.println("Day 06");
+
+        List<Car> cars = new ArrayList<>();
+        cars.add(new Car(
+                1L, "Toyota", "Corolla", 2020, 50_00L, CarType.STANDARD
+        ));
+        cars.add(new Car(
+                2L, "BMW", "X1", 2022, 40_00L, CarType.PREMIUM
+        ));
+        cars.add(new Car(
+                3L, "Audi", "A3", 2019, 40_00L, CarType.STANDARD
+        ));
+        cars.add(new Car(
+                4L, "BMW", "X3", 2022, 70_00L, CarType.SUV
+        ));
+        cars.add(new Car(
+                5L, "Audi", "A4", 2020, 50_00L, CarType.ECONOMY
+        ));
+
+        List<Car> byPrice = new ArrayList<>(cars);
+        List<Car> byYear = new ArrayList<>(cars);
+        List<Car> byMake = new ArrayList<>(cars);
+
+        System.out.println("Sort by price");
+        byPrice.sort(new CarByPriceComparator());
+        for (Car car : byPrice) System.out.print(car.getId() + " ");
+        System.out.println();
+
+        System.out.println("Sort by year");
+        byYear.sort(new CarByYearComparator());
+        for (Car car : byYear) System.out.print(car.getId() + " ");
+        System.out.println();
+
+        System.out.println("Sort by make");
+        byMake.sort(new CarByMakeComparator());
+        for (Car car : byMake) System.out.print(car.getId() + " ");
+        System.out.println();
+
+
+        // Car queue
+        CarWaitingList carWaitingList = new CarWaitingList();
+        Customer customerForQueue1 = new Customer(5L, "Jake", "37689230");
+        Customer customerForQueue2 = new Customer(6L, "Marley", "28849292");
+        Customer customerForQueue3 = new Customer(7L, "Phill", "17848939");
+
+        System.out.println(carRepository.findById(1L).isAvailable());
+
+        carWaitingList.join(carRepository.findById(1L), customerForQueue1);
+        carWaitingList.join(carRepository.findById(1L), customerForQueue2);
+        carWaitingList.join(carRepository.findById(1L), customerForQueue3);
+
+        carWaitingList.join(carRepository.findById(2L), customerForQueue1);
+
+        System.out.println(carWaitingList.peekNext(1L).getId());
+        System.out.println(carWaitingList.peekNext(1L).getId());
+        System.out.println(carWaitingList.waitingCount(1L));
+
+        carWaitingList.pollNext(1L);
+        System.out.println(carWaitingList.peekNext(1L).getId());
+        System.out.println(carWaitingList.waitingCount(1L));
+
+        System.out.println(carWaitingList.pollNext(1L).getId());
+        System.out.println(carWaitingList.pollNext(1L).getId());
+        System.out.println(carWaitingList.pollNext(1L));
+
+        try {
+            carWaitingList.join(carRepository.findById(1L), customer);
+            carWaitingList.join(carRepository.findById(1L), customer);
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            carRepository.findById(1L).returnTheCar();
+            carWaitingList.join(carRepository.findById(1L), customer);
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
+
+        List<Customer> customers = carWaitingList.getWaitingCustomers(1L);
+        System.out.println(customers);
+        customers.clear();
+        System.out.println(customers);
+        System.out.println(carWaitingList.getWaitingCustomers(1L));
     }
 }
