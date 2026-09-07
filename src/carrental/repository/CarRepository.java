@@ -20,14 +20,11 @@ public class CarRepository implements Repository<Car, Long> {
     }
 
     @Override
-    public Car findById(Long id) {
+    public Optional<Car> findById(Long id) {
         if (id == null) throw new IllegalArgumentException("Id can't be null");
         if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
 
-        Car car = cars.get(id);
-        if (car == null) throw new NoSuchElementException("No such element");
-
-        return car;
+        return Optional.ofNullable(cars.get(id));
     }
 
     @Override

@@ -30,7 +30,8 @@ public class RepositoryUtils {
 
         List<T> resultList = new ArrayList<>();
         for (ID id : ids) {
-            resultList.add(repository.findById(id));
+            resultList.add(repository.findById(id)
+                    .orElseThrow( () -> new IllegalArgumentException("No element with id: " + id)));
 
         }
 

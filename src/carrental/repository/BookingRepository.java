@@ -21,15 +21,11 @@ public class BookingRepository implements Repository<Booking, Long> {
     }
 
     @Override
-    public Booking findById(Long id) {
+    public Optional<Booking> findById(Long id) {
         if (id == null) throw new IllegalArgumentException("Id can't be null");
         if (id < 1) throw new IllegalArgumentException("Id must be greater than 0");
 
-        Booking booking = bookings.get(id);
-        if (booking == null) {
-            throw new NoSuchElementException("No such element");
-        }
-        return booking;
+        return Optional.ofNullable(bookings.get(id));
     }
 
     @Override
