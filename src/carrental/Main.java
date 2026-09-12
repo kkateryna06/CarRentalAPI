@@ -1,15 +1,15 @@
 package carrental;
 
-import carrental.comparators.CarByMakeComparator;
-import carrental.comparators.CarByPriceComparator;
-import carrental.comparators.CarByYearComparator;
+import carrental.exception.CarUnavailableException;
 import carrental.pricing.LongTermPriceCalculator;
 import carrental.pricing.PriceCalculator;
 import carrental.pricing.StandardPriceCalculator;
 import carrental.repository.BookingRepository;
 import carrental.repository.CarRepository;
 import carrental.repository.RepositoryUtils;
+import carrental.service.BookingService;
 
+import java.time.LocalDate;
 import java.util.*;
 
 public class Main {
@@ -43,89 +43,66 @@ public class Main {
 
         PriceCalculator standardPriceCalculator = new StandardPriceCalculator();
         PriceCalculator longPriceCalculator = new LongTermPriceCalculator();
-        List<Booking> bookings = List.of(
-                new Booking(
-                        1L,
-                        cars.get(0),
-                        customers.get(0),
-                        3,
-                        standardPriceCalculator
-                ),
-                new Booking(
-                        2L,
-                        cars.get(1),
-                        customers.get(1),
-                        7,
-                        longPriceCalculator
-                ),
-                new Booking(
-                        3L,
-                        cars.get(2),
-                        customers.get(2),
-                        2,
-                        standardPriceCalculator
-                ),
-                new Booking(
-                        4L,
-                        cars.get(3),
-                        customers.get(0),
-                        5,
-                        standardPriceCalculator
-                ),
-                new Booking(
-                        5L,
-                        cars.get(4),
-                        customers.get(1),
-                        10,
-                        longPriceCalculator
-                ),
-                new Booking(
-                        6L,
-                        cars.get(5),
-                        customers.get(2),
-                        4,
-                        standardPriceCalculator
-                ),
-                new Booking(
-                        7L,
-                        cars.get(7),
-                        customers.get(0),
-                        1,
-                        standardPriceCalculator
-                ),
-                new Booking(
-                        8L,
-                        cars.get(9),
-                        customers.get(1),
-                        14,
-                        longPriceCalculator
-                )
+
+        BookingService bookingService = new BookingService(carRepository, bookingRepository);
+
+        bookingService.createBooking(1, 1, customers.get(0),
+                LocalDate.of(2026, 9, 12),
+                LocalDate.of(2026, 9, 14),
+                standardPriceCalculator
         );
-        RepositoryUtils.addAll(bookingRepository, bookings);
+        bookingService.createBooking(2, 4, customers.get(4),
+                LocalDate.of(2026, 9, 12),
+                LocalDate.of(2026, 9, 14),
+                standardPriceCalculator
+        );
+        System.out.println(bookingRepository.count());
+        System.out.println(bookingRepository.findById(1L).orElseThrow().getStatus());
+        System.out.println(carRepository.findById(1L).orElseThrow().isAvailable());
 
-        CarAnalytics carAnalytics = new CarAnalytics(carRepository);
-        System.out.println(carAnalytics.findAvailableCars());
-        System.out.println(carAnalytics.calculateAveragePricePerDayInCents());
-        System.out.println(carAnalytics.groupCarsByMake());
-        System.out.println(carAnalytics.findCheapestCar());
-
-        CarAnalytics  emptyCarAnalytics = new CarAnalytics(new CarRepository());
-        System.out.println(emptyCarAnalytics.findAvailableCars());
-        System.out.println(emptyCarAnalytics.calculateAveragePricePerDayInCents());
-        System.out.println(emptyCarAnalytics.groupCarsByMake());
-        System.out.println(emptyCarAnalytics.findCheapestCar());
-
+        // unavailable car
         try {
-            new CarAnalytics(null);
+            bookingService.createBooking(3, 1, customers.get(1),
+                    LocalDate.of(2026, 9, 14),
+                    LocalDate.of(2026, 9, 20),
+                    longPriceCalculator
+            );
+        } catch (CarUnavailableException e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println(bookingRepository.count());
+
+        // existed booking id
+        try {
+            bookingService.createBooking(1, 2, customers.get(1),
+                    LocalDate.of(2026, 9, 2),
+                    LocalDate.of(2026, 9, 10),
+                    longPriceCalculator
+            );
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
+        System.out.println(bookingRepository.count());
 
-        System.out.println(carRepository.findById(4L)
-                .map(car -> car.getMake() + " " + car.getModel())
-                .orElse("No car was found"));
-        System.out.println(carRepository.findById(15L)
-                .map(car -> car.getMake() + " " + car.getModel())
-                .orElse("No car was found"));
+        // invalid date
+        try {
+            bookingService.createBooking(3, 2, customers.get(1),
+                    LocalDate.of(2026, 9, 10),
+                    LocalDate.of(2026, 9, 2),
+                    longPriceCalculator
+            );
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println(bookingRepository.count());
+
+        bookingService.cancelBooking(1);
+        bookingService.completeBooking(2);
+
+        try {
+            bookingService.cancelBooking(2);
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
