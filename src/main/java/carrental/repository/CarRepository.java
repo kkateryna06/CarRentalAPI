@@ -4,6 +4,7 @@ import carrental.Car;
 
 import java.util.*;
 
+@org.springframework.stereotype.Repository
 public class CarRepository implements Repository<Car, Long> {
     private final Map<Long, Car> cars;
 

@@ -11,7 +11,7 @@ public class Car {
     private boolean isAvailable;
     private final CarType carType;
 
-    Car(long id, String make, String model, int year, long dayRent, CarType carType) {
+    public Car(long id, String make, String model, int year, long dayRent, CarType carType) {
         if (year <= 0 || year > 2026) {
             throw new IllegalArgumentException("Invalid year");
         } else if (dayRent <= 0) {

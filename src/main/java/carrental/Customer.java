@@ -7,7 +7,7 @@ public class Customer {
     private String name;
     private final String licenseNumber;
 
-    Customer(long id, String name, String licenseNumber) {
+    public Customer(long id, String name, String licenseNumber) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name is required");
         } else if (licenseNumber == null || licenseNumber.isBlank()) {

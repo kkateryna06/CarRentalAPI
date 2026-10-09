@@ -9,9 +9,11 @@ import carrental.exception.CarUnavailableException;
 import carrental.pricing.PriceCalculator;
 import carrental.repository.BookingRepository;
 import carrental.repository.CarRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+@Service
 public class BookingService {
     private final CarRepository carRepository;
     private final BookingRepository bookingRepository;
@@ -54,7 +56,7 @@ public class BookingService {
         boolean result = bookingRepository.add(booking);
 
         if (!result)
-            throw new IllegalArgumentException("Car with id " + carId + " was not added to repository");
+            throw new IllegalArgumentException("Booking with id " + carId + " was not added to repository");
 
         car.rent();
         return booking;

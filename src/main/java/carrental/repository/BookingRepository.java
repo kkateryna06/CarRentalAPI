@@ -5,7 +5,7 @@ import carrental.BookingStatus;
 
 import java.util.*;
 
-
+@org.springframework.stereotype.Repository
 public class BookingRepository implements Repository<Booking, Long> {
     private final Map<Long, Booking> bookings;
 
